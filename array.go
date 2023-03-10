@@ -1,7 +1,7 @@
 // @@
 // @ Author       : Eacher
 // @ Date         : 2023-03-08 14:09:25
-// @ LastEditTime : 2023-03-10 16:06:28
+// @ LastEditTime : 2023-03-10 16:33:54
 // @ LastEditors  : Eacher
 // @ --------------------------------------------------------------------------------<
 // @ Description  : 
@@ -11,25 +11,28 @@
 package array
 
 import(
-    // "fmt"
     "sort"
     "sync"
     "reflect"
 )
 
-type Arrays[K, V any] struct {
+type Ordered interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64 | ~string
+}
+
+type Arrays[K Ordered, V any] struct {
 	mutex 	sync.RWMutex
 	len 	int
 	isSort 	bool
 	list 	[]Node[K,V]
 }
 
-type Node[K, V any] struct {
+type Node[K Ordered, V any] struct {
 	Key 	K
 	Value 	V
 }
 
-func New[K, V any]() *Arrays[K,V] { return &Arrays[K,V]{list: make([]Node[K,V], 0)} }
+func New[K Ordered, V any]() *Arrays[K,V] { return &Arrays[K,V]{list: make([]Node[K,V], 0)} }
 
 func (a *Arrays[K,V]) Len() int {
 	return a.len
@@ -49,29 +52,7 @@ func (a *Arrays[K,V]) Less(i, j int) (ok bool) {
 	}()
 	if a.isSort {
 		if reflect.ValueOf(a.list[i].Value).Comparable() && reflect.ValueOf(a.list[j].Value).Comparable() {
-			ok = false
-			// var ai, aj any
-			// var oi, oj int64
-			// switch reflect.ValueOf(a.list[i].Value).Kind() {
-			// case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			// 	return Temp[int64](reflect.ValueOf(a.list[i].Value).Int(), reflect.ValueOf(a.list[j].Value).Int())
-			// 	ai = reflect.ValueOf(a.list[i].Value).Int()
-			// case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-			// 	ai = reflect.ValueOf(a.list[i].Value).Uint()
-			// }
-			// switch reflect.ValueOf(a.list[j].Value).Kind() {
-			// case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			// 	aj = reflect.ValueOf(a.list[j].Value).Int()
-			// case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-			// 	aj = reflect.ValueOf(a.list[j].Value).Uint()
-			// }
-			// if ai != nil && aj != nil {
-			// 	if oi, ok = ai.(int64); ok {
-			// 		if oj, ok = aj.(int64); ok {
-			// 			return oi > oj
-			// 		}
-			// 	}
-			// }
+			ok = a.list[i].Key > a.list[j].Key
 		}
 	}
     return ok
