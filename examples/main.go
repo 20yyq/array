@@ -15,6 +15,7 @@ func main() {
     // fmt.Println("ArraysTest11111111", ok2, v, ok, k1, v1, ok1)
     nodes, ok1 := a.Gets(1111, 123)
     fmt.Println("ArraysTest22222222", ok2, v, ok, nodes, ok1, a.First().Value)
+    a.Asc = true
     a.Sort()
     nodes, ok1 = a.Gets(1111, 123)
     fmt.Println("ArraysTest22222222", ok2, v, ok, nodes, ok1, a.First().Value)

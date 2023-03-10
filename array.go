@@ -1,7 +1,7 @@
 // @@
 // @ Author       : Eacher
 // @ Date         : 2023-03-08 14:09:25
-// @ LastEditTime : 2023-03-10 16:33:54
+// @ LastEditTime : 2023-03-10 16:51:33
 // @ LastEditors  : Eacher
 // @ --------------------------------------------------------------------------------<
 // @ Description  : 
@@ -13,7 +13,6 @@ package array
 import(
     "sort"
     "sync"
-    "reflect"
 )
 
 type Ordered interface {
@@ -21,6 +20,7 @@ type Ordered interface {
 }
 
 type Arrays[K Ordered, V any] struct {
+	Asc 	bool
 	mutex 	sync.RWMutex
 	len 	int
 	isSort 	bool
@@ -32,7 +32,7 @@ type Node[K Ordered, V any] struct {
 	Value 	V
 }
 
-func New[K Ordered, V any]() *Arrays[K,V] { return &Arrays[K,V]{list: make([]Node[K,V], 0)} }
+func New[K Ordered, V any]() *Arrays[K,V] { return &Arrays[K,V]{list: make([]Node[K,V], 0, 1)} }
 
 func (a *Arrays[K,V]) Len() int {
 	return a.len
@@ -51,8 +51,8 @@ func (a *Arrays[K,V]) Less(i, j int) (ok bool) {
 		}
 	}()
 	if a.isSort {
-		if reflect.ValueOf(a.list[i].Value).Comparable() && reflect.ValueOf(a.list[j].Value).Comparable() {
-			ok = a.list[i].Key > a.list[j].Key
+		if ok = a.list[i].Key > a.list[j].Key; a.Asc {
+			ok = !ok
 		}
 	}
     return ok
@@ -70,14 +70,9 @@ func (a *Arrays[K,V]) Sort() {
 
 func (a *Arrays[K,V]) getIndex(key K) (i int, ok bool) {
 	a.mutex.RLock()
-	defer func () {
-		if err := recover(); err != nil {
-			i, ok = -1, false
-		}
-		a.mutex.RUnlock()
-	}()
+	defer a.mutex.RUnlock()
 	for v, n := range a.list {
-		if ok = reflect.ValueOf(key).Equal(reflect.ValueOf(n.Key)); ok {
+		if ok = n.Key == key; ok {
 			i = v
 			break
 		}
