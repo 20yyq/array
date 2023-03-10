@@ -6,7 +6,7 @@ import(
 )
 
 func main() {
-    a := array.New[int,string]()
+    a := &array.Arrays[int,string]{}
     a.PushFront(123, "123")
     a.PushFront(1111, "dsgfdg")
     ok2 := a.Set(array.Node[int,string]{Key: 1111, Value: "123421416666"})

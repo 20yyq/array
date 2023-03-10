@@ -1,7 +1,7 @@
 // @@
 // @ Author       : Eacher
 // @ Date         : 2023-03-08 14:09:25
-// @ LastEditTime : 2023-03-10 16:51:33
+// @ LastEditTime : 2023-03-10 16:59:44
 // @ LastEditors  : Eacher
 // @ --------------------------------------------------------------------------------<
 // @ Description  : 
@@ -32,8 +32,6 @@ type Node[K Ordered, V any] struct {
 	Value 	V
 }
 
-func New[K Ordered, V any]() *Arrays[K,V] { return &Arrays[K,V]{list: make([]Node[K,V], 0, 1)} }
-
 func (a *Arrays[K,V]) Len() int {
 	return a.len
 }
@@ -45,11 +43,6 @@ func (a *Arrays[K,V]) Swap(i, j int) {
 }
 
 func (a *Arrays[K,V]) Less(i, j int) (ok bool) {
-	defer func () {
-		if err := recover(); err != nil {
-			ok = false
-		}
-	}()
 	if a.isSort {
 		if ok = a.list[i].Key > a.list[j].Key; a.Asc {
 			ok = !ok
@@ -67,18 +60,6 @@ func (a *Arrays[K,V]) Sort() {
 }
 
 /*-----------------------------------------------------------------数组的泛型方法 start ---------------------------------------------------*/
-
-func (a *Arrays[K,V]) getIndex(key K) (i int, ok bool) {
-	a.mutex.RLock()
-	defer a.mutex.RUnlock()
-	for v, n := range a.list {
-		if ok = n.Key == key; ok {
-			i = v
-			break
-		}
-	}
-	return
-}
 
 func (a *Arrays[K,V]) Exist(key K) (ok bool) {
 	_, ok = a.getIndex(key)
@@ -128,6 +109,9 @@ func (a *Arrays[K,V]) PushBack(key K, value V) *Node[K,V] {
 	n := Node[K,V]{Key: key, Value: value}
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
+	if a.list == nil {
+		a.list = make([]Node[K,V], 0, 1)
+	}
 	a.list = append(a.list, n)
 	a.len++
 	return &n
@@ -261,3 +245,15 @@ func (a *Arrays[K,V]) Slice(start, size int) *Arrays[K,V] {
 }
 
 /*-----------------------------------------------------------------数组的泛型方法 end   ---------------------------------------------------*/
+
+func (a *Arrays[K,V]) getIndex(key K) (i int, ok bool) {
+	a.mutex.RLock()
+	defer a.mutex.RUnlock()
+	for v, n := range a.list {
+		if ok = n.Key == key; ok {
+			i = v
+			break
+		}
+	}
+	return
+}
